@@ -18,7 +18,7 @@ def watermark(img,file):
         height, width = img.shape[:2]
         alpha = 0.3
         namestamp = "Laryssa"
-        cv2.putText(overlay, namestamp.format(alpha), (width-150, height-30), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255), thickness=2)
+        cv2.putText(overlay, namestamp.format(alpha), (width-300, height-30), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255), thickness=2)
         cv2.addWeighted(overlay, alpha, output, 1 - alpha, 0, output)
         cv2.imwrite("watermark{}".format(file), output)
 
@@ -42,7 +42,7 @@ clean_folder()
 
 while True:
     format_images()
-    for file in glob.glob('watermarkimages/*.jpg'):    
+    for file in glob.glob('watermarkimages/*.jpg'):
         if key != 113:
             img = cv2.imread(file)
             if previous_img is not None:
