@@ -11,13 +11,10 @@ def encontrar_quadrados(erode, lado_quadrado):
             elif(erode[i,j] == 1 and len(result) > 0):            
                 aux = 0
                 for r in result:
-                    #se estiver na mesma linha verifica apenas a diferença da coluna (tamanho do quadrado - 1)
                     if(i == r[0] and abs(j-r[1]) > limite):
                             aux += 1
-                    #se estiver na mesma coluna verifica apenas a diferença da linha                
                     elif(j == r[1] and abs(i-r[0]) > limite):
                             aux += 1
-                    #se não esta na mesma linha nem na mesma coluna verifica apenas um ou outro
                     elif(abs(i-r[0]) > limite or abs(j-r[1]) > limite):
                             aux += 1
                 if(aux == len(result)):
