@@ -27,53 +27,26 @@ for contour in contour_list:
     roi=img[y:y+h,x:x+w]
     cv2.imwrite('dados_recortados/'+ str(idx) + '.jpg', roi)
     cv2.rectangle(img,(x,y),(x+w,y+h),(200,0,0),2)
-cv2.imshow('img',img)
 
 i = 0
 for file in glob.glob('dados_recortados/*.jpg'):
 	img_dado = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
-	ret,thresh_dado = cv2.threshold(img_dado,127,255,cv2.THRESH_BINARY_INV)
-	cv2.imshow("Dado " + str(i), thresh_dado)
+	ret,thresh_dado = cv2.threshold(img_dado,127,255,cv2.THRESH_BINARY_INV)	
 	i+=1
 
+	detector = cv2.SimpleBlobDetector_create()
+	keypoints = detector.detect(img_dado)
+	
+	height_dado, width_dado = img_dado.shape[:2]
+	print("Altura do dado: " + str(height_dado) + " Largura do dado: " + str(width_dado))
+	posicao = (width_dado-30, height_dado-5)
 
-# print(rect)
+	height, width = img.shape[:2]
 
-# Setup SimpleBlobDetector parameters.
-# params = cv2.SimpleBlobDetector_Params()
-
-# params.blobColor = 255
-# params.filterByColor = True 
-
-# # Change thresholds
-# # params.minThreshold = 10
-# # params.maxThreshold = 200
-
-# # Filter by Circularity
-# params.filterByCircularity = True
-# params.minCircularity = 0.785
-# params.maxCircularity = 0.785
-
-# ver = (cv2.__version__).split('.')
-# if int(ver[0]) < 3 :
-#     detector = cv2.SimpleBlobDetector(params)
-# else : 
-#     detector = cv2.SimpleBlobDetector_create(params)
-
-# Set up the detector with default parameters.
-# detector = cv2.SimpleBlobDetector_create()
- 
-# keypoints = detector.detect(thresh)
-
-# print("Blobs = ", len(keypoints))
-# for marker in keypoints:
-#     #center
-#     x,y = np.int(marker.pt[0]),np.int(marker.pt[1])
-#     pos = np.int(marker.size / 2)
-#     cv2.rectangle(thresh2,(x-pos,y-pos),(x+pos,y+pos),(255,0,0),1)
-    
-# cv2.imshow("Blobs = "+ str(len(keypoints)), thresh)
-# cv2.imshow("Blobs",thresh)
-
+	cv2.putText(img_dado, str(len(keypoints)), (posicao), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0))
+	# cv2.putText(img, str(len(keypoints)), (width-posicao[0], height-posicao[1]), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0))
+	cv2.imshow("Blobs = "+ str(i), img_dado)
+# print("Altura da imagem: " + str(height) + " Largura da imagem: " + str(width))
+# cv2.imshow("Original ", img)
 
 cv2.waitKey(0)
