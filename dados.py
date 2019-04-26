@@ -1,52 +1,53 @@
-import cv2 
+import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 import glob
 
-img = cv2.imread('dados.jpg',cv2.IMREAD_GRAYSCALE)
+# função que utiliza o simple Blob detector para identificar o valor do dado
+def valorDado(img):
+    detector = cv2.SimpleBlobDetector_create()
+    keypoints = detector.detect(img)
+    return len(keypoints)
 
-ret,thresh = cv2.threshold(img,245,255,cv2.THRESH_BINARY_INV)
+# importando fonte utilizada
+font = cv2.FONT_HERSHEY_SIMPLEX
 
-medianFiltered = cv2.medianBlur(thresh,5)
+# lendo a imagem em escala de cinza
+img = cv2.imread('dados.jpg', cv2.IMREAD_GRAYSCALE)
 
+# fazendo o threshold (binário preto e branco)
+ret, thresh = cv2.threshold(img, 245, 255, cv2.THRESH_BINARY_INV)
+
+# reduzindo ruídos na imagem
+medianFiltered = cv2.medianBlur(thresh, 5)
+
+# encontra os contornos de figuras detectadas na imagem
 contours, hierarchy = cv2.findContours(medianFiltered, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+# lista de contornos válidos
 contour_list = []
+
+# verifica nos contornos encontrados se o mesmo possui area maior q 100px (contorno válido)
 for contour in contours:
     area = cv2.contourArea(contour)
     if area > 100:
         contour_list.append(contour)
 
-cv2.drawContours(img, contour_list, -1, (255,255,255), 2)
-cv2.imshow('Objects detected', img)
+# converte a imagem de escala de cinza para RGB
+img_cor = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
 
-idx = 0
+# itera pela lista de contornos válidos
 for contour in contour_list:
-    idx += 1
-    x,y,w,h = cv2.boundingRect(contour)
-    roi=img[y:y+h,x:x+w]
-    cv2.imwrite('dados_recortados/'+ str(idx) + '.jpg', roi)
-    cv2.rectangle(img,(x,y),(x+w,y+h),(200,0,0),2)
+    # pega as coordenadas do menor retângulo ao redor contorno sendo analisado
+    x, y, w, h = cv2.boundingRect(contour)
 
-i = 0
-for file in glob.glob('dados_recortados/*.jpg'):
-	img_dado = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
-	ret,thresh_dado = cv2.threshold(img_dado,127,255,cv2.THRESH_BINARY_INV)	
-	i+=1
+    # faz uma cópia da imagem detectada dentro do retângulo
+    roi = img_cor[y:y+h, x:x+w]
 
-	detector = cv2.SimpleBlobDetector_create()
-	keypoints = detector.detect(img_dado)
-	
-	height_dado, width_dado = img_dado.shape[:2]
-	print("Altura do dado: " + str(height_dado) + " Largura do dado: " + str(width_dado))
-	posicao = (width_dado-30, height_dado-5)
+    # escreve o valor retornados da função valorDado na imagem
+    cv2.putText(img_cor, str(valorDado(roi)), (x+w, y+h), font, 1, (0,0,255), thickness=3)
 
-	height, width = img.shape[:2]
-
-	cv2.putText(img_dado, str(len(keypoints)), (posicao), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0))
-	# cv2.putText(img, str(len(keypoints)), (width-posicao[0], height-posicao[1]), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0))
-	cv2.imshow("Blobs = "+ str(i), img_dado)
-# print("Altura da imagem: " + str(height) + " Largura da imagem: " + str(width))
-# cv2.imshow("Original ", img)
+# exibe a imagem final já com os valores dos dados detectados
+cv2.imshow('Imagem Final', img_cor)
 
 cv2.waitKey(0)
